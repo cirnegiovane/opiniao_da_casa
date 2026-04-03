@@ -82,14 +82,15 @@ Os dados do banco são preservados no volume `pgdata` entre reinicializações.
 
 ## API
 
-| Método | Rota          | Descrição                         |
-| ------ | ------------- | --------------------------------- |
-| GET    | `/genres`     | Lista gêneros em ordem alfabética |
-| POST   | `/genres`     | Cria um gênero                    |
-| GET    | `/items`      | Lista itens com filtros opcionais |
-| POST   | `/items`      | Cria um item                      |
-| PUT    | `/items/{id}` | Atualiza um item                  |
-| DELETE | `/items/{id}` | Remove um item                    |
+| Método | Rota           | Descrição                         |
+| ------ | -------------- | --------------------------------- |
+| GET    | `/genres`      | Lista gêneros em ordem alfabética |
+| POST   | `/genres`      | Cria um gênero                    |
+| DELETE | `/genres/{id}` | Remove um gênero                  |
+| GET    | `/items`       | Lista itens com filtros opcionais |
+| POST   | `/items`       | Cria um item                      |
+| PUT    | `/items/{id}`  | Atualiza um item                  |
+| DELETE | `/items/{id}`  | Remove um item                    |
 
 ### Filtros disponíveis em GET /items
 
