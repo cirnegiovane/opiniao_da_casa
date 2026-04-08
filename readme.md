@@ -1,117 +1,77 @@
 # Opinião da Casa
 
-Watchlist colaborativa para filmes, livros, jogos e séries — acessível por qualquer dispositivo na rede local via browser.
+Uma watchlist colaborativa para organizar filmes, livros, jogos e séries. O projeto foi desenhado para ser acessível por qualquer dispositivo na rede local (celular, tablet, PC) através de uma infraestrutura containerizada.
+
+![Demonstração do Sistema](assets/opiniao_da_casa_v2.gif)
 
 ## Stack
 
-| Camada         | Tecnologia                   |
-| -------------- | ---------------------------- |
-| Backend        | Python + FastAPI             |
-| Banco de dados | PostgreSQL 16                |
-| ORM            | SQLAlchemy                   |
-| Validação      | Pydantic v2                  |
-| Frontend       | HTML + CSS + JavaScript puro |
-| Servidor web   | Nginx                        |
-| Infraestrutura | Docker + Docker Compose      |
+| Camada             | Tecnologia                          |
+| ------------------ | ----------------------------------- |
+| **Backend**        | Python + FastAPI                    |
+| **Banco de Dados** | PostgreSQL 16                       |
+| **ORM**            | SQLAlchemy                          |
+| **Validação**      | Pydantic v2                         |
+| **Frontend**       | HTML5 + CSS3 + JavaScript (Vanilla) |
+| **Servidor Web**   | Nginx (Proxy Reverso)               |
+| **Infraestrutura** | Docker + Docker Compose             |
 
-## Funcionalidades
+## Destaques Técnicos
 
-- Cadastro de títulos com tipo (filme, livro, jogo, série), status, nota de 1 a 10 e múltiplos gêneros
-- Edição e remoção de itens
-- Filtros por tipo, status e gênero
-- Relacionamento muitos-para-muitos entre itens e gêneros
-- Acessível por qualquer dispositivo na mesma rede local
-- Dados persistidos em volume Docker
+- **Agnóstico de Ambiente:** Graças ao uso de `window.location.origin` no frontend e Proxy Reverso no Nginx, a aplicação funciona em qualquer IP ou domínio sem necessidade de alterar o código-fonte.
+- **Resiliência com Docker DNS:** Configuração de `resolver 127.0.0.11` no Nginx para garantir que o serviço inicie corretamente mesmo com dependências em boot.
+- **Segurança:** Gestão de credenciais sensíveis via variáveis de ambiente (`.env`).
+- **Arquitetura REST:** API totalmente documentada com Swagger, seguindo os padrões de métodos HTTP e códigos de status semânticos.
 
-## Estrutura
+## Como Rodar
 
-```
-opiniao/
-├── backend/
-│   ├── main.py          # rotas da API REST (GET, POST, PUT, DELETE)
-│   ├── database.py      # conexão e pool com PostgreSQL
-│   ├── models.py        # tabelas como classes ORM
-│   ├── schemas.py       # validação de entrada e saída com Pydantic
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── index.html       # interface completa em HTML/CSS/JS
-│   ├── nginx.conf       # configuração do servidor web
-│   └── Dockerfile
-└── docker-compose.yml
+### 1. Pré-requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando.
+
+### 2. Configuração inicial
+
+Crie o arquivo de variáveis de ambiente na raiz do projeto:
+
+```bash
+cp .env.example .env
 ```
 
-## Como rodar
+_(As senhas padrão já estão configuradas para rodar localmente, mas podem ser alteradas no arquivo `.env`)_
 
-### Pré-requisitos
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-### Subir o ambiente
+### 3. Subir o ambiente
 
 ```bash
 docker compose up --build -d
 ```
 
-### Acessar
+### 4. Acessar a aplicação
 
-| Serviço             | Endereço                   |
-| ------------------- | -------------------------- |
-| Frontend            | http://localhost           |
-| API                 | http://localhost:8000      |
-| Documentação da API | http://localhost:8000/docs |
+| Serviço              | Endereço                                                 |
+| -------------------- | -------------------------------------------------------- |
+| **Frontend**         | [http://localhost](http://localhost)                     |
+| **Documentação API** | [http://localhost:8000/docs](http://localhost:8000/docs) |
 
-### Acesso pela rede local
+## Acesso pela Rede Local
 
-Substitua `localhost` pelo IP da máquina na rede Wi-Fi ou Ethernet. Para descobrir o IP:
+Para acessar de um celular ou outro computador na mesma rede Wi-Fi:
 
-```powershell
-# Windows
-ipconfig
-```
+1. Descubra o IP da sua máquina (Windows: `ipconfig` | Linux/Mac: `ifconfig` [Em algumas distribuições Linux modernas, o comando ifconfig pode não estar instalado por padrão; utilize ip addr como alternativa]).
+2. No navegador do dispositivo móvel, digite: `http://SEU_IP_AQUI` (ex: `http://192.168.15.10`).
 
-Atualize a constante `API` no `frontend/index.html` com o IP correto antes de buildar.
+---
 
-### Parar
-
-```bash
-docker compose down
-```
-
-Os dados do banco são preservados no volume `pgdata` entre reinicializações.
-
-## API
-
-| Método | Rota           | Descrição                         |
-| ------ | -------------- | --------------------------------- |
-| GET    | `/genres`      | Lista gêneros em ordem alfabética |
-| POST   | `/genres`      | Cria um gênero                    |
-| DELETE | `/genres/{id}` | Remove um gênero                  |
-| GET    | `/items`       | Lista itens com filtros opcionais |
-| POST   | `/items`       | Cria um item                      |
-| PUT    | `/items/{id}`  | Atualiza um item                  |
-| DELETE | `/items/{id}`  | Remove um item                    |
-
-### Filtros disponíveis em GET /items
+## Estrutura do Projeto
 
 ```
-GET /items?type=filme&status=concluido&genre_id=1
+opiniao/
+├── backend/       # API FastAPI e lógica de negócio
+├── frontend/      # Interface Web e configuração Nginx
+├── .env.example   # Modelo de variáveis de ambiente
+└── docker-compose.yml
 ```
 
-## Modelo de dados
+## Modelo de Dados
 
-```
-genres                    items
-──────────────            ──────────────────────────
-id   (PK)                 id          (PK)
-name                      title
-                          type        filme | livro | jogo | serie
-                          status      quero | em andamento | concluido | dropei
-                          rating      1–10 (opcional)
-                          created_at
-
-item_genres (N:N)
-─────────────────
-item_id   (FK → items.id)
-genre_id  (FK → genres.id)
-```
+- **Relacionamento Many-to-Many:** Itens podem ter múltiplos gêneros e gêneros pertencem a múltiplos itens.
+- **Persistência:** Dados armazenados em volumes Docker (`pgdata`), garantindo que não sejam perdidos ao reiniciar os containers.
