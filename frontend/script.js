@@ -1,4 +1,4 @@
-const API = "http://192.168.15.6:8000";
+const API = window.location.origin + "/api";
 
 let allItems = [];
 let genres = [];
@@ -113,7 +113,9 @@ async function createGenre() {
     renderGenrePicker([...selectedGenreIds]);
     toast("Gênero adicionado");
   } else {
-    toast("Erro ao adicionar gênero", true);
+    const errorData = await res.json();
+    toast(errorData.detail || "Erro ao adicionar gênero", true);
+    return;
   }
 }
 

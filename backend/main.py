@@ -23,7 +23,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-#define o GET/genres e o modelo de resposta
+
 @app.get('/genres', response_model=list[schemas.GenreResponse]) 
 def list_genres(db: Session = Depends(get_db)):
     return db.query(Genre).order_by(Genre.name).all()  #SELECT * FROM genres
@@ -31,7 +31,20 @@ def list_genres(db: Session = Depends(get_db)):
 
 @app.post('/genres',response_model=schemas.GenreResponse)
 def create_genre(genre: schemas.GenreCreate, db: Session = Depends(get_db)):
-    novo_genre = Genre(name=genre.name)
+
+    genre_name = genre.name.strip().capitalize()
+    
+    exist = db.query(Genre).filter(Genre.name == genre_name).first()
+    
+    if exist:
+        raise HTTPException(status_code=400, detail='Este gênero já está cadastrado.')
+    
+
+    novo_genre = Genre(name=genre_name)
+    
+    #SELECT * FROM items WHERE id == {item_id}
+    
+
     db.add(novo_genre)
     db.commit()
     db.refresh(novo_genre)
