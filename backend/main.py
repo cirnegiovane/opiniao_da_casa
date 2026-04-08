@@ -24,6 +24,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def read_root():
+    return {
+        "message": "API Opinião da Casa está online!",
+        "docs": "/docs",
+        "version": "1.0.0"
+    }
+
+
 @app.get('/genres', response_model=list[schemas.GenreResponse]) 
 def list_genres(db: Session = Depends(get_db)):
     return db.query(Genre).order_by(Genre.name).all()  #SELECT * FROM genres
